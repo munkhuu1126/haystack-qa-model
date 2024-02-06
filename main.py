@@ -7,6 +7,14 @@ from haystack.pipelines import ExtractiveQAPipeline
 from pprint import pprint
 from haystack import Pipeline, Document
 from haystack.utils import print_answers
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+
+class Question(BaseModel):
+    question: str
+
+app = FastAPI()
 
 converter = PDFToTextConverter()
 
@@ -16,7 +24,7 @@ doc_dir = [{
 }]
 
 # TODO run instance of OpenSearch
-document_store = OpenSearchDocumentStore()
+document_store = InMemoryDocumentStore(use_bm25=True)
 documents = converter.convert(file_path=Path('./ww2.pdf'), meta={'name': 'WW2'})
 
 document_store.write_documents(documents)
@@ -25,12 +33,19 @@ document_store.write_documents(documents)
 # indexing_pipeline.add_node(component=document_store, name="DocumentStore", inputs=["PDFConverter"])
 # indexing_pipeline.run_batch(file_paths=[doc_dir])
 retriever = BM25Retriever(document_store=document_store)
-reader = FARMReader(model_name_or_path="timpal0l/mdeberta-v3-base-squad2", use_gpu=True)
+reader = FARMReader(model_name_or_path="timpal0l/mdeberta-v3-base-squad2")
 pipe = ExtractiveQAPipeline(reader, retriever=retriever)
 
-prediction = pipe.run(
-    query = "Хитлер хэзээ амиа хорлосон бэ?", params = {"Retriever": {"top_k":10}, "Reader": {"top_k":5}}
-)
 
+def run_prediction(query):
+    return pipe.run(
+    query = query, params = {"Retriever": {"top_k":10}, "Reader": {"top_k":5}}
+    )
 
-print_answers(prediction, details="minimum")
+@app.get('/')
+def start():
+    return {"Hello": "World"}
+
+@app.post('/question/')
+def answer(item:Question):
+    return run_prediction(item.question)

@@ -1,3 +1,5 @@
 #pip install -r requirements.txt
 
-farm-haystack[inference]
+farm-haystack[inference, opensearch]
+fastapi
+uvicorn[standard]
