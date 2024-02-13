@@ -9,6 +9,7 @@ from haystack import Pipeline, Document
 from haystack.utils import print_answers
 from fastapi import FastAPI
 from pydantic import BaseModel
+from converter import Converter
 
 
 class Question(BaseModel):
@@ -25,9 +26,9 @@ doc_dir = [{
 
 # TODO run instance of OpenSearch
 document_store = InMemoryDocumentStore(use_bm25=True)
-documents = converter.convert(file_path=Path('./ww2.pdf'), meta={'name': 'WW2'})
-
-document_store.write_documents(documents)
+converter = Converter()
+documents = converter.run_converter('./ww2.pdf')
+document_store.write_documents(documents = [documents])
 # indexing_pipeline = Pipeline()
 # indexing_pipeline.add_node(component=converter, name="PDFConverter", inputs=["File"])
 # indexing_pipeline.add_node(component=document_store, name="DocumentStore", inputs=["PDFConverter"])
