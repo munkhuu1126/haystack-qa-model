@@ -26,9 +26,10 @@ doc_dir = [{
 
 # TODO run instance of OpenSearch
 document_store = InMemoryDocumentStore(use_bm25=True)
-converter = Converter()
-documents = converter.run_converter('./ww2.pdf')
-document_store.write_documents(documents = [documents])
+documents = converter.convert(file_path=Path('./ww2.pdf'))
+# converter = Converter()
+# documents = converter.run_converter('./ww2.pdf')
+document_store.write_documents(documents =documents)
 # indexing_pipeline = Pipeline()
 # indexing_pipeline.add_node(component=converter, name="PDFConverter", inputs=["File"])
 # indexing_pipeline.add_node(component=document_store, name="DocumentStore", inputs=["PDFConverter"])
