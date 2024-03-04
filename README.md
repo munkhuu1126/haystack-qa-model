@@ -10,3 +10,7 @@ install packages
 ```
 pip install -r requirements.txt
 ```
+run the program with:
+```
+uvicorn main:app reload
+```
